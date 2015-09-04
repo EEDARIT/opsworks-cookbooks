@@ -3,6 +3,12 @@ chef_gem "aws-sdk" do
   action :install
 end
 
+directory "C:\Temp" do
+  action :create
+  recursive true
+  rights :full_control, 'Administrator', :applies_to_children => true
+end
+
 ruby_block "download-object" do
   block do
     require 'aws-sdk'
@@ -16,7 +22,7 @@ ruby_block "download-object" do
     s3region = app[0][:environment][:S3REGION]
     s3bucket = app[0][:environment][:BUCKET]
     s3filename = app[0][:environment][:FILENAME]
-    temp = 'C:\temp\' + s3filename
+    temp = 'C:/Temp/' + s3filename
 
     #3
     s3_client = Aws::S3::Client.new(region: s3region)
