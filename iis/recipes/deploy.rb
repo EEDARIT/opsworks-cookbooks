@@ -16,17 +16,13 @@ ruby_block "download-object" do
     s3region = app[0][:environment][:S3REGION]
     s3bucket = app[0][:environment][:BUCKET]
     s3filename = app[0][:environment][:FILENAME]
+    temp = 'C:\temp\' + s3filename
 
     #3
     s3_client = Aws::S3::Client.new(region: s3region)
     s3_client.get_object(bucket: s3bucket,
                          key: s3filename,
-                         response_target: 'C:\temp\' + s3filename)
+                         response_target: temp)
   end
   action :run
-end
-
-windows_zipfile 'c:/temp' do
-  source 'c:/temp/' + app[0][:environment][:FILENAME]
-  action :unzip
 end
