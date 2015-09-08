@@ -44,7 +44,7 @@ end
 
 # Sync the update with the default website
 execute "Sync Web Site" do
-  command 'robocopy ' + workspace + '\iis-application ' + node["iis"]["docroot"] + ' /MIR /COPYALL /FFT /Z /XA:H /W:5'
+  command 'robocopy ' + workspace + '\iis-application ' + node["iis"]["docroot"] + ' /MIR /FFT /Z /XA:H /W:5'
   returns [0, 1, 2, 3, 4, 5, 6, 7]
 end
 
