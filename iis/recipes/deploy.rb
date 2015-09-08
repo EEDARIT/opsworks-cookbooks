@@ -4,12 +4,8 @@ chef_gem "aws-sdk" do
   action :install
 end
 
-# Create the directory to download too
-directory "/files/default" do
-  recursive true
-  rights :full_control, 'Administrator', :applies_to_children => true
-  action :create
-end
+# Define the workspace to download and extract files
+workspace = Chef::Config[:file_cache_path]
 
 # Download the update to the working location
 ruby_block "download-object" do
@@ -30,14 +26,14 @@ ruby_block "download-object" do
     s3_client = Aws::S3::Client.new(region: s3region)
     s3_client.get_object(bucket: s3bucket,
                          key: s3filename,
-                         response_target: '/files/default/update.zip')
+                         response_target: workspace + '/update.zip')
   end
   action :run
 end
 
 # Extract the application
-windows_zipfile "/files/default" do
-  source '/files/default/update.zip'
+windows_zipfile workspace do
+  source workspace + '/update.zip'
   action :unzip
 end
 
@@ -47,10 +43,9 @@ iis_site "Default Web Site" do
 end
 
 # Sync the update with the default website
-remote_directory "#{node['iis']['docroot']}" do
-  source 'iis-application'
-  purge true
-  action :create
+execute "Sync Web Site" do
+  command 'robocopy ' + workspace + '\iis-application ' + node["iis"]["docroot"] + ' /MIR /COPYALL /FFT /Z /XA:H /W:5'
+  returns [0, 1, 2, 3, 4, 5, 6, 7]
 end
 
 # Restart the default website 
