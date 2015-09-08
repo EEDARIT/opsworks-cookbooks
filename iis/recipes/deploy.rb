@@ -5,7 +5,7 @@ chef_gem "aws-sdk" do
 end
 
 # Create the directory to download too
-directory "C:/Temp" do
+directory "/files/default" do
   recursive true
   rights :full_control, 'Administrator', :applies_to_children => true
   action :create
@@ -30,14 +30,14 @@ ruby_block "download-object" do
     s3_client = Aws::S3::Client.new(region: s3region)
     s3_client.get_object(bucket: s3bucket,
                          key: s3filename,
-                         response_target: 'C:/Temp/update.zip')
+                         response_target: '/files/default/update.zip')
   end
   action :run
 end
 
 # Extract the application
-windows_zipfile "C:/Temp" do
-  source 'C:/Temp/update.zip'
+windows_zipfile "/files/default" do
+  source '/files/default/update.zip'
   action :unzip
 end
 
@@ -48,7 +48,7 @@ end
 
 # Sync the update with the default website
 remote_directory "#{node['iis']['docroot']}" do
-  source 'C:/Temp/iisapplication'
+  source 'iis-application'
   purge true
   action :create
 end
@@ -56,10 +56,4 @@ end
 # Restart the default website 
 iis_site "Default Web Site" do
   action :start
-end
-
-# Delete our workspace
-directory "C:/Temp" do
-  recursive true
-  action [:delete]
 end
